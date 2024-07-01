@@ -9,6 +9,7 @@ module.exports.register = async (req, res) => {
     const userToken = jwt.sign({ id: user._id, firstName: user.firstName }, process.env.FIRST_SECRET_KEY);
     res.cookie("usertoken", userToken, { httpOnly: true }).json({ msg: "success!", user });
   } catch (err) {
+    console.error(err); 
     res.status(400).json({ err });
   }
 };

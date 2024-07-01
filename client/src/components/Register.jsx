@@ -11,7 +11,7 @@ const Register = () => {
     confirmPassword: '',
   });
   const [error, setError] = useState('');
-  const navigate = useNavigate();
+  const navigate = useNavigate(); 
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -20,15 +20,18 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(''); // Clear any previous error messages
+    setError(''); 
     if (user.password !== user.confirmPassword) {
       setError('Passwords do not match');
       return;
     }
-
+  
     try {
-      const response = await axios.post('http://localhost:8000/api/register', user);
-      if (response.status === 201) {
+      const response = await axios.post('http://localhost:8000/api/register', user, {
+        withCredentials: true,
+      });
+      console.log(response);
+      if (response.status === 200) {
         alert('Registration successful');
         navigate('/login');
       } else {
@@ -38,10 +41,12 @@ const Register = () => {
       if (err.response && err.response.data && err.response.data.err) {
         setError(err.response.data.err.message);
       } else {
+        console.error(err); 
         setError('An unexpected error occurred');
       }
     }
   };
+  
 
   return (
     <div className="p-4">
