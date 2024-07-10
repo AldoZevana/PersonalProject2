@@ -1,3 +1,4 @@
+// server/server.js
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -21,6 +22,7 @@ require('./routes/foodDelivery.routes')(app);
 require('./routes/user.routes')(app);
 require('./routes/foodItem.routes')(app);
 require('./routes/order.routes')(app);
+require('./routes/payment.routes')(app); // Add this line
 
 const server = app.listen(8000, () => {
     console.log("Listening at Port 8000");

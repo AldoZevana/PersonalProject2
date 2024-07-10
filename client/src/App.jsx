@@ -1,23 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { loadStripe } from '@stripe/stripe-js';
+import { Elements } from '@stripe/react-stripe-js';
 import Layout from './components/Layout';
 import Home from './components/Home';
 import Register from './components/Register';
 import Login from './components/Login';
 import FoodMenu from './components/FoodMenu';
 import Cart from './components/Cart';
+import AdminDashboard from './components/AdminDashboard';
+import CheckoutForm from './components/CheckoutForm';
 import './tailwind.css';
 import axios from 'axios';
 
 axios.defaults.withCredentials = true;
 
+const stripePromise = loadStripe('pk_test_51PafxYRw9lSQ9MQVubcyz66asYdln68UA0yAWgpTqZlOCQnTcSK7fvntlNMViBCJQkdch7OU2X50GIcGMZvJHAFX00h75IuojV');
+
 const App = () => {
   const [cartItems, setCartItems] = useState([]);
   const [loggedIn, setLoggedIn] = useState(false);
   const [user, setUser] = useState(null);
+  const [orderId, setOrderId] = useState(null);
+  const [orderAmount, setOrderAmount] = useState(0);
 
   useEffect(() => {
-    // Check if the user is already logged in when the app loads
     const checkLoginStatus = async () => {
       try {
         const response = await axios.get('http://localhost:8000/api/checkAuth');
@@ -45,10 +52,12 @@ const App = () => {
     try {
       const response = await axios.post('http://localhost:8000/api/orders', {
         items: cartItems,
-        orderNumber: `ORD-${Date.now()}`
+        orderNumber: `ORD-${Date.now()}`,
       });
       if (response.status === 201) {
         alert('Order placed successfully');
+        setOrderId(response.data._id);
+        setOrderAmount(response.data.amount); // Assuming your order response contains the amount
         setCartItems([]);
       } else {
         alert('Failed to place order');
@@ -89,6 +98,16 @@ const App = () => {
           ) : (
             <Navigate to="/login" />
           )} />
+          <Route path="/admin" element={loggedIn && user && user.isAdmin ? (
+            <AdminDashboard />
+          ) : (
+            <Navigate to="/login" />
+          )} />
+          <Route path="/checkout" element={
+            <Elements stripe={stripePromise}>
+              <CheckoutForm orderId={orderId} amount={orderAmount} />
+            </Elements>
+          } />
         </Routes>
       </Layout>
     </Router>

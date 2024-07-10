@@ -1,3 +1,4 @@
+// server/models/user.models.js
 const mongoose = require("mongoose");
 const bcrypt = require('bcrypt');
 
@@ -24,7 +25,10 @@ const UserSchema = new mongoose.Schema({
     required: [true, "Password is required"],
     minlength: [8, "Password must be 8 characters or longer"]
   },
-  foods: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Food' }]
+  isAdmin: {
+    type: Boolean,
+    default: false
+  },
 }, { timestamps: true });
 
 UserSchema.virtual('confirmPassword')

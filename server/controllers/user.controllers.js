@@ -6,10 +6,19 @@ require('dotenv').config();
 module.exports.register = async (req, res) => {
   try {
     const user = await User.create(req.body);
-    const userToken = jwt.sign({ id: user._id, firstName: user.firstName }, process.env.FIRST_SECRET_KEY);
+    const userToken = jwt.sign({ id: user._id, firstName: user.firstName, isAdmin: user.isAdmin }, process.env.FIRST_SECRET_KEY);
     res.cookie("usertoken", userToken, { httpOnly: true }).json({ msg: "success!", user });
   } catch (err) {
-    console.error(err); 
+    res.status(400).json({ err });
+  }
+};
+
+module.exports.registerAdmin = async (req, res) => {
+  try {
+    const user = await User.create({ ...req.body, isAdmin: true });
+    const userToken = jwt.sign({ id: user._id, firstName: user.firstName, isAdmin: user.isAdmin }, process.env.FIRST_SECRET_KEY);
+    res.cookie("usertoken", userToken, { httpOnly: true }).json({ msg: "success!", user });
+  } catch (err) {
     res.status(400).json({ err });
   }
 };
@@ -25,7 +34,7 @@ module.exports.login = async (req, res) => {
     return res.status(400).json("password didn't match!");
   }
 
-  const userToken = jwt.sign({ id: user._id, firstName: user.firstName }, process.env.FIRST_SECRET_KEY);
+  const userToken = jwt.sign({ id: user._id, firstName: user.firstName, isAdmin: user.isAdmin }, process.env.FIRST_SECRET_KEY);
   return res.cookie("usertoken", userToken, { httpOnly: true }).json({ msg: "success!", user });
 };
 

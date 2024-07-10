@@ -1,3 +1,4 @@
+// server/controllers/order.controllers.js
 const mongoose = require('mongoose');
 const Order = require('../models/order.models');
 
@@ -5,15 +6,11 @@ const createOrder = async (req, res) => {
   const { items, orderNumber } = req.body;
   const userId = req.userId;
 
-  // Validate userId
   if (!mongoose.Types.ObjectId.isValid(userId)) {
     return res.status(400).json({ error: 'Invalid userId' });
   }
 
-  // Convert userId to ObjectId
   const validUserId = new mongoose.Types.ObjectId(userId);
-
-  // Ensure items are converted to ObjectId
   let validItems;
   try {
     validItems = items.map(item => {
@@ -50,11 +47,20 @@ const getOrderStatus = async (req, res) => {
 
 const getAllOrders = async (req, res) => {
   try {
-    const orders = await Order.find();
+    const orders = await Order.find({ userId: req.userId });
     return res.json(orders);
   } catch (error) {
     return res.status(500).json({ message: 'Failed to fetch orders', details: error.message });
   }
 };
 
-module.exports = { createOrder, getOrderStatus, getAllOrders };
+const getAllOrdersForAdmin = async (req, res) => {
+  try {
+    const orders = await Order.find().populate('items');
+    return res.json(orders);
+  } catch (error) {
+    return res.status(500).json({ message: 'Failed to fetch orders', details: error.message });
+  }
+};
+
+module.exports = { createOrder, getOrderStatus, getAllOrders, getAllOrdersForAdmin };
